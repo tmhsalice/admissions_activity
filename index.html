@@ -7,95 +7,176 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
 :root{
-  --navy:#02257F;--navylight:#1B3A93;--gold:#D4A017;--goldlight:#E8C158;
-  --bg:#F8F6F1;--card:#FFFFFF;--tx:#222831;--mu:#6B7280;--bd:#E3DFD3;--pr:#02257F;--prt:#FFFFFF;
-  box-sizing:border-box
+  --navy:#02257F;--navylight:#1B3A93;--gold:#D4A017;--goldsoft:rgba(212,160,23,.14);
+  --bg:#F6F8FB;--card:#FFFFFF;--hover:#F8FAFC;--track:#EEF2F6;
+  --tx:#0F172A;--tx2:#475569;--mu:#64748B;--bd:#E5E7EB;
+  --ok-bg:#ECFDF5;--ok-tx:#047857;--dg:#9E2A2F;
+  --shadow:0 1px 2px rgba(15,23,42,.04),0 4px 12px rgba(15,23,42,.03);
+  --radius:12px;--radius-sm:8px;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 system-ui,-apple-system,"Microsoft JhengHei","PingFang TC",sans-serif;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 system-ui,-apple-system,"Microsoft JhengHei","PingFang TC",sans-serif;-webkit-font-smoothing:antialiased}
 body.app-on{padding-left:256px}
+body.embed-on{padding:0!important;background:transparent}
 
-header{background:var(--navy);color:#fff;position:fixed;left:0;top:0;bottom:0;width:256px;display:flex;flex-direction:column;z-index:20;overflow-y:auto}
+/* 桌機左側導覽列（與招生工作手冊統一） */
+header.side{background:var(--navy);color:#fff;position:fixed;left:0;top:0;bottom:0;width:256px;display:flex;flex-direction:column;z-index:20;overflow-y:auto}
 .brand-box{padding:24px;border-bottom:1px solid var(--navylight)}
 .brand-top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .brand-top img{width:44px;height:44px;object-fit:contain;flex:none}
 .brand-note{font-size:10px;letter-spacing:.1em;color:rgba(212,160,23,.9);margin:0}
-h1{font-size:20px;font-weight:500;margin:0;line-height:1.35;color:#fff}
+header.side h1{font-size:20px;font-weight:600;margin:0;line-height:1.35;color:#fff}
 .en-title{display:inline-block;font-size:11px;letter-spacing:.2em;color:var(--gold);margin:6px 0 0;padding-bottom:8px;border-bottom:1px solid rgba(212,160,23,.4)}
-.sys-sub{font-size:12px;color:rgba(255,255,255,.7);margin:8px 0 0}
+.sys-sub{font-size:12px;color:rgba(255,255,255,.72);margin:8px 0 0}
 
-nav{display:flex;flex-direction:column;padding:8px 0}
-nav button{border:0;border-left:4px solid transparent;background:transparent;color:rgba(255,255,255,.8);padding:12px 24px;cursor:pointer;font:inherit;font-size:16px;text-align:left;transition:background .15s,color .15s}
-nav button:hover{background:var(--navylight);color:#fff}
-nav button.on{background:rgba(255,255,255,.08);border-left-color:var(--gold);color:#fff;font-weight:600}
+nav.side-nav{display:flex;flex-direction:column;padding:8px 0}
+nav.side-nav button{border:0;border-left:4px solid transparent;background:transparent;color:rgba(255,255,255,.82);padding:12px 24px;cursor:pointer;font:inherit;font-size:16px;text-align:left;transition:background .15s,color .15s}
+nav.side-nav button:hover{background:var(--navylight);color:#fff}
+nav.side-nav button.on{background:rgba(255,255,255,.1);border-left-color:var(--gold);color:#fff;font-weight:600}
 
-.ft{margin-top:auto;padding:16px 24px;border-top:1px solid var(--navylight);font-size:12px;color:rgba(255,255,255,.75);line-height:1.7}
-.ft-btn{display:inline-block;padding:4px 10px;font-size:12px;border-radius:4px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;text-decoration:none;margin-right:6px;margin-top:6px;transition:background .15s}
+.ft{margin-top:auto;padding:16px 24px;border-top:1px solid var(--navylight);font-size:12px;color:rgba(255,255,255,.78);line-height:1.7}
+.ft-btn{display:inline-block;padding:5px 10px;font-size:12px;border-radius:6px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;text-decoration:none;margin-right:6px;margin-top:6px;transition:background .15s}
 .ft-btn:hover{background:var(--navylight)}
-.ft-copy{margin-top:12px;font-size:11px;color:rgba(255,255,255,.45);line-height:1.6}
+.ft-copy{margin-top:12px;font-size:11px;color:rgba(255,255,255,.48);line-height:1.6}
 
-main{max-width:1380px;margin:0 auto;padding:28px 36px}
-.sec{font-size:12px;letter-spacing:.15em;color:var(--gold);font-weight:600;text-transform:uppercase;margin-bottom:4px}
-h2.pt{margin:0 0 18px;font-size:28px;font-weight:600;color:var(--tx)}
-.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
-select,input{font:inherit;padding:7px 12px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--tx)}
+/* 手機頂部列、抽屜、底部 5 分頁導覽 */
+.m-top,.m-nav,.m-drawer-mask{display:none}
+
+/* 主內容區 */
+main{max-width:1320px;margin:0 auto;padding:28px 36px 48px}
+body.embed-on main{max-width:none;padding:4px 2px 16px}
+.page-hd{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}
+.sec{font-size:11px;letter-spacing:.15em;color:var(--gold);font-weight:700;text-transform:uppercase;margin-bottom:4px}
+h2.pt{margin:0;font-size:26px;font-weight:700;color:var(--tx)}
+.yr-box{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:5px 12px}
+.yr-box label{font-size:13px;color:var(--tx2);font-weight:600}
+
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+select,input{font:inherit;padding:7px 12px;border:1px solid var(--bd);border-radius:var(--radius-sm);background:var(--card);color:var(--tx)}
 select:focus,input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 2px rgba(212,160,23,.2)}
 
-.btn{border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:7px 14px;border-radius:6px;cursor:pointer;font:inherit;font-size:15px;text-decoration:none;display:inline-block;transition:background .15s,opacity .15s}
-.btn:hover{background:var(--bg)}
+.btn{border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:7px 14px;border-radius:var(--radius-sm);cursor:pointer;font:inherit;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .15s,opacity .15s}
+.btn:hover{background:var(--hover)}
 .btn.pri{background:var(--navy);color:#fff;border-color:var(--navy)}
 .btn.pri:hover{background:var(--navylight)}
+.btn.ghost{background:#EFF6FF;color:var(--navy);border-color:transparent;font-size:13px;font-weight:600;padding:6px 12px}
+.btn.ghost:hover{background:#DBEAFE}
 .btn.sm{padding:4px 10px;font-size:13px}
-.btn.dg{color:#9E2A2F;border-color:#e5c3c5}
+.btn.dg{color:var(--dg);border-color:#e5c3c5}
 .btn.dg:hover{background:#fdf2f2}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:14px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:18px 20px;margin-bottom:14px}
-.num{font-size:30px;font-weight:700;color:var(--navy);margin-top:4px}
-.mu{color:var(--mu);font-size:14px}
-.row{display:flex;align-items:center;gap:10px;margin:8px 0}
-.row .l{width:130px;font-size:15px;flex:none}
-.trk{flex:1;background:var(--bg);border-radius:4px;height:16px;overflow:hidden;border:1px solid var(--bd)}
-.fil{height:16px;border-radius:3px}
+/* 內嵌頁籤列 */
+.embed-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;box-shadow:var(--shadow)}
+.embed-tabs{display:inline-flex;background:var(--track);padding:4px;border-radius:10px;gap:4px}
+.embed-tabs button{border:0;background:transparent;color:var(--tx2);padding:7px 16px;border-radius:7px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s}
+.embed-tabs button.on{background:var(--navy);color:#fff;box-shadow:0 1px 3px rgba(2,37,127,.25)}
 
+/* 卡片與 KPI */
+.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 24px;margin-bottom:18px}
+.card-hd{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.card-title{margin:0;font-size:16px;font-weight:700;color:var(--tx)}
+.card-sub{font-size:12px;color:var(--mu);margin-top:2px}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:18px}
+.kpi-card{background:var(--card);border:1px solid var(--bd);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px}
+.kpi-label{font-size:13px;color:var(--tx2);font-weight:500;margin-bottom:8px}
+.kpi-val-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.kpi-num{font-size:32px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.15}
+.kpi-sub{font-size:13px;color:var(--mu);font-variant-numeric:tabular-nums}
+.status-pill{display:inline-flex;align-items:center;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--ok-bg);color:var(--ok-tx)}
+
+/* 類型分布與排行榜 */
+.dist-list,.rank-list{display:flex;flex-direction:column;gap:4px}
+.dist-row{display:grid;grid-template-columns:135px 1fr 44px;align-items:center;gap:14px;padding:8px 10px;border-radius:var(--radius-sm);transition:background .15s}
+.dist-row:hover,.rank-row:hover{background:var(--hover)}
+.dist-label{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:var(--tx)}
+.dist-dot{width:9px;height:9px;border-radius:50%;flex:none}
+.track{height:8px;background:var(--track);border-radius:999px;overflow:hidden}
+.fil{height:100%;border-radius:999px;transition:width .25s ease}
+.dist-cnt{text-align:right;font-size:14px;font-weight:700;color:var(--tx);font-variant-numeric:tabular-nums}
+.dist-row.is-zero .dist-label,.dist-row.is-zero .dist-cnt{color:#94A3B8;font-weight:400}
+.dist-row.is-zero .dist-dot{background:#CBD5E1!important}
+
+.rank-row{display:grid;grid-template-columns:34px 115px 1fr 48px;align-items:center;gap:12px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s}
+.rank-badge{font-size:13px;font-weight:700;color:var(--mu);text-align:center;font-variant-numeric:tabular-nums}
+.rank-row.top3 .rank-badge{color:var(--gold);background:var(--goldsoft);border-radius:6px;padding:2px 0}
+.rank-name{font-size:14px;font-weight:600;color:var(--navy);text-decoration:underline;text-underline-offset:3px}
+.rank-track{height:6px;background:var(--track);border-radius:999px;overflow:hidden}
+.rank-fill{height:100%;background:#93C5FD;border-radius:999px}
+.rank-row.top3 .rank-fill{background:var(--navy)}
+.rank-cnt{text-align:right;font-size:14px;font-weight:700;color:var(--tx);font-variant-numeric:tabular-nums}
+
+.mu{color:var(--mu);font-size:13px}
 .sc{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{padding:11px 12px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
-th{color:var(--mu);font-weight:600;cursor:pointer;background:var(--bg);border-bottom:2px solid rgba(212,160,23,.45)}
-td.n,th.n{text-align:center}
-.link{color:var(--navy);cursor:pointer;text-decoration:underline;font-weight:500}
+th{color:var(--tx2);font-weight:600;cursor:pointer;background:var(--hover);border-bottom:2px solid rgba(212,160,23,.45)}
+td.n,th.n{text-align:center;font-variant-numeric:tabular-nums}
+.link{color:var(--navy);cursor:pointer;text-decoration:underline;font-weight:600}
 .link:hover{color:var(--gold)}
-.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:middle}
-.tag{display:inline-block;padding:2px 9px;border-radius:4px;color:#fff;font-size:13px;font-weight:500}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.tag{display:inline-block;padding:2px 9px;border-radius:5px;color:#fff;font-size:12px;font-weight:500}
 
-/* 行事曆放大與清晰度優化 */
+/* 行事曆 */
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.cal .h{text-align:center;color:var(--tx);font-size:15px;padding:10px 0;font-weight:600;background:var(--bg);border-radius:4px}
-.cal .d{min-height:112px;border:1px solid var(--bd);border-radius:6px;padding:8px;font-size:15px;background:#fff;overflow:hidden}
-.cal .d b{display:inline-block;margin-bottom:4px;color:var(--tx)}
-.ev{display:block;color:#fff;border-radius:5px;padding:4px 8px;margin-top:5px;cursor:pointer;font-size:14px;font-weight:500;line-height:1.35;white-space:normal;word-break:break-word;transition:opacity .15s}
+.cal .h{text-align:center;color:var(--tx);font-size:14px;padding:9px 0;font-weight:600;background:var(--track);border-radius:6px}
+.cal .d{min-height:106px;border:1px solid var(--bd);border-radius:8px;padding:7px;font-size:14px;background:#fff;overflow:hidden}
+.cal .d b{display:inline-block;margin-bottom:4px;color:var(--tx);font-variant-numeric:tabular-nums}
+.ev{display:block;color:#fff;border-radius:5px;padding:4px 7px;margin-top:4px;cursor:pointer;font-size:13px;font-weight:500;line-height:1.35;white-space:normal;word-break:break-word;transition:opacity .15s}
 .ev:hover{opacity:.88}
 .ev.x{opacity:.45;text-decoration:line-through}
+.list-row{display:flex;align-items:center;gap:10px;padding:10px 8px;border-bottom:1px solid var(--bd);cursor:pointer;font-size:14px}
+.list-row:hover{background:var(--hover)}
 
-.mask{position:fixed;inset:0;background:rgba(2,37,127,.45);display:flex;align-items:center;justify-content:center;z-index:30;padding:16px}
-.modal{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:24px;max-width:640px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 12px 32px rgba(0,0,0,.2)}
+/* 彈窗與手機底部滑出表單 */
+.mask{position:fixed;inset:0;background:rgba(2,37,127,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:24px;max-width:620px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 16px 40px rgba(0,0,0,.22)}
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--navy)}
-.login-box{background:#fff;border-radius:8px;padding:28px;max-width:380px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+.login-box{background:#fff;border-radius:12px;padding:28px;max-width:380px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,.25)}
 .login-box h2{margin:0 0 6px;font-size:20px;color:var(--navy)}
-.loading{position:fixed;inset:0;background:rgba(248,246,241,.78);display:none;align-items:center;justify-content:center;z-index:50;font-weight:600;color:var(--navy);font-size:16px}
+.loading{position:fixed;inset:0;background:rgba(246,248,251,.8);display:none;align-items:center;justify-content:center;z-index:80;font-weight:600;color:var(--navy);font-size:15px}
 .loading.on{display:flex}
 
-@media(max-width:800px){
-  body.app-on{padding-left:0}
-  header{position:static;width:auto}
-  .brand-box{padding:16px}
-  nav{flex-direction:row;overflow-x:auto;padding:0}
-  nav button{padding:10px 14px;font-size:14px;white-space:nowrap;border-left:0;border-bottom:3px solid transparent}
-  nav button.on{border-left:0;border-bottom-color:var(--gold)}
-  .ft{padding:12px 16px}
-  .cal .d{min-height:64px;padding:4px;font-size:13px}
+/* ===== 手機版面深度優化 ===== */
+@media(max-width:860px){
+  body.app-on{padding-left:0;padding-top:56px;padding-bottom:68px}
+  header.side{display:none}
+  .m-top{display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;height:56px;background:var(--navy);color:#fff;padding:0 14px;z-index:30;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .m-brand{display:flex;align-items:center;gap:10px}
+  .m-brand img{width:30px;height:30px;object-fit:contain}
+  .m-brand-t{font-size:15px;font-weight:600;line-height:1.2}
+  .m-brand-s{font-size:10px;color:var(--gold);letter-spacing:.08em}
+  .m-menu-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:8px;padding:6px 10px;font-size:16px;cursor:pointer}
+
+  .m-drawer-mask{display:none;position:fixed;inset:0;background:rgba(2,37,127,.45);z-index:60}
+  .m-drawer-mask.open{display:block}
+  .m-drawer{position:fixed;top:0;right:0;bottom:0;width:260px;background:var(--navy);color:#fff;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:-4px 0 24px rgba(0,0,0,.25)}
+
+  .m-nav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:0;left:0;right:0;height:62px;background:#fff;border-top:1px solid var(--bd);z-index:30;box-shadow:0 -2px 10px rgba(15,23,42,.06)}
+  .m-nav button{border:0;border-top:3px solid transparent;background:transparent;color:var(--mu);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:500;cursor:pointer;padding:4px 0}
+  .m-nav button svg{width:20px;height:20px}
+  .m-nav button.on{color:var(--navy);border-top-color:var(--gold);font-weight:700}
+
+  main{padding:16px 14px 24px}
+  h2.pt{font-size:21px}
+  .card{padding:16px}
+  /* 2+1 便當格 KPI */
+  .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .kpi-card{padding:14px 16px}
+  .kpi-card:nth-child(3){grid-column:1 / -1}
+  .kpi-num{font-size:26px}
+  /* 雙層緊湊長條圖 */
+  .dist-row{grid-template-columns:1fr auto;gap:6px 10px;padding:8px 6px}
+  .dist-row .track{grid-column:1 / -1;order:3}
+  .rank-row{grid-template-columns:28px 1fr auto;gap:6px 8px;padding:8px 6px}
+  .rank-row .rank-track{grid-column:2 / -1;order:3}
+
+  .cal{gap:3px}
+  .cal .d{min-height:66px;padding:4px;font-size:12px}
   .ev{font-size:11px;padding:2px 4px}
-  main{padding:16px}
+
+  /* 彈窗改為底部滑出 Bottom Sheet */
+  .mask{align-items:flex-end;padding:0}
+  .modal{border-radius:16px 16px 0 0;max-height:82vh;padding:20px 18px 28px}
 }
 </style>
 </head>
@@ -113,12 +194,16 @@ const T = [
   ['活動設攤','#9E2A2F'],['營隊體驗課程','#258DC4'],['介紹就讀','#65A30D'],['其他','#6B7280']
 ];
 
+const EMBED_PARAM = new URLSearchParams(location.search).get('embed') || '';
+const IS_EMBED = EMBED_PARAM === 'guide' || EMBED_PARAM === 'cal' || EMBED_PARAM === 'home';
+
 const S = {
   staffId: localStorage.getItem('dm_staffId') || '',
   userName: localStorage.getItem('dm_staffName') || '',
   staff: [],
   activities: [],
-  page: 'home',
+  page: EMBED_PARAM === 'cal' ? 'cal' : 'home',
+  embedTab: EMBED_PARAM === 'home' ? 'home' : 'cal',
   year: '115',
   m: new Date().getMonth(),
   calY: new Date().getFullYear(),
@@ -127,12 +212,23 @@ const S = {
   aq: '',
   rq: '',
   sort: 'total',
-  dir: -1
+  dir: -1,
+  hideZero: false,
+  rankExpanded: false,
+  drawerOpen: false
 };
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const setLoad = on => $('#ld').classList.toggle('on', on);
+
+function notifyHeight() {
+  if (!IS_EMBED) return;
+  requestAnimationFrame(() => {
+    const h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ type: 'dmActivityHeight', height: h }, '*');
+  });
+}
 
 async function api(action, payload = {}) {
   setLoad(true);
@@ -157,18 +253,30 @@ function renderBlocked(msg = '請先從「招生工作手冊」輸入員工編�
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
         <img src="${LOGO_URL}" alt="" style="width:40px;height:40px;object-fit:contain" onerror="this.style.display='none'">
         <div>
-          <div style="font-size:16px;font-weight:600;color:var(--navy)">大明高級中學</div>
+          <div style="font-size:16px;font-weight:700;color:var(--navy)">大明高級中學</div>
           <div style="font-size:10px;letter-spacing:.15em;color:var(--gold)">TA-MING HIGH SCHOOL</div>
         </div>
       </div>
       <h2>招生活動管理系統</h2>
-      <p style="color:#9E2A2F;font-size:14px;background:#fdf2f2;border:1px solid #f5c6cb;padding:10px 12px;border-radius:6px;margin:14px 0">${esc(msg)}</p>
-      <a href="${GUIDE_URL}" class="btn pri" style="width:100%;text-align:center;padding:10px">前往招生工作手冊登入</a>
+      <p style="color:var(--dg);font-size:14px;background:#fdf2f2;border:1px solid #f5c6cb;padding:10px 12px;border-radius:8px;margin:14px 0">${esc(msg)}</p>
+      <a href="${GUIDE_URL}" class="btn pri" style="width:100%;padding:10px">前往招生工作手冊登入</a>
     </div>
   </div>`;
 }
 
 async function loadAll() {
+  if (IS_EMBED) {
+    try {
+      const data = await api('getPublic');
+      S.staff = data.staff || [];
+      S.activities = data.activities || [];
+      draw();
+    } catch (err) {
+      $('#root').innerHTML = `<div class="card"><p class="mu">資料載入失敗：${esc(err.message)}</p></div>`;
+      notifyHeight();
+    }
+    return;
+  }
   if (!S.staffId) return renderBlocked();
   try {
     const data = await api('getAll');
@@ -193,7 +301,39 @@ function getYears() {
   return [...set].sort();
 }
 
+const ICONS = {
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>',
+  cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  stats: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>',
+  manage: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+  roster: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+};
+
 function draw() {
+  if (IS_EMBED) {
+    document.body.classList.add('embed-on');
+    document.body.classList.remove('app-on');
+    $('#root').innerHTML = `
+    <main>
+      <div class="embed-bar">
+        <div class="embed-tabs">
+          <button class="${S.embedTab === 'cal' ? 'on' : ''}" onclick="S.embedTab='cal';draw()">📅 招生行事曆</button>
+          <button class="${S.embedTab === 'home' ? 'on' : ''}" onclick="S.embedTab='home';draw()">📊 活動總覽</button>
+        </div>
+        <div class="yr-box">
+          <label>學年度</label>
+          <select onchange="S.year=this.value;draw()">
+            ${getYears().map(y => `<option value="${y}" ${String(S.year) === y ? 'selected' : ''}>${y} 學年度</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div id="content"></div>
+    </main>`;
+    $('#content').innerHTML = S.embedTab === 'cal' ? cal() : home();
+    notifyHeight();
+    return;
+  }
+
   document.body.classList.add('app-on');
   const pages = [
     ['home', '首頁總覽'],
@@ -203,7 +343,7 @@ function draw() {
     ['roster', '教職員名冊']
   ];
   $('#root').innerHTML = `
-  <header>
+  <header class="side">
     <div class="brand-box">
       <div class="brand-top">
         <img src="${LOGO_URL}" alt="大明高級中學校徽" onerror="this.style.display='none'">
@@ -213,7 +353,7 @@ function draw() {
       <p class="en-title">TA-MING HIGH SCHOOL</p>
       <p class="sys-sub">招生活動管理系統</p>
     </div>
-    <nav>${pages.map(([k, v]) => `<button class="${S.page === k ? 'on' : ''}" onclick="S.page='${k}';draw()">${v}</button>`).join('')}</nav>
+    <nav class="side-nav">${pages.map(([k, v]) => `<button class="${S.page === k ? 'on' : ''}" onclick="S.page='${k}';draw()">${v}</button>`).join('')}</nav>
     <div class="ft">
       登入者：<b style="color:#fff">${esc(S.userName || S.staffId)}</b><br>
       <button class="ft-btn" onclick="loadAll()">重新整理</button>
@@ -221,14 +361,47 @@ function draw() {
       <div class="ft-copy">本系統僅供校內招生同仁使用。<br>網頁相關問題與內容更新，請洽 #251 思婷</div>
     </div>
   </header>
+
+  <div class="m-top">
+    <div class="m-brand">
+      <img src="${LOGO_URL}" alt="" onerror="this.style.display='none'">
+      <div>
+        <div class="m-brand-t">大明高級中學</div>
+        <div class="m-brand-s">招生活動管理系統</div>
+      </div>
+    </div>
+    <button class="m-menu-btn" onclick="S.drawerOpen=true;draw()">☰</button>
+  </div>
+
+  <div class="m-drawer-mask ${S.drawerOpen ? 'open' : ''}" onclick="if(event.target===this){S.drawerOpen=false;draw()}">
+    <div class="m-drawer">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--navylight);padding-bottom:12px">
+        <b style="color:var(--gold)">系統資訊</b>
+        <button class="ft-btn" style="margin:0" onclick="S.drawerOpen=false;draw()">✕</button>
+      </div>
+      <div style="font-size:14px">登入者：<b>${esc(S.userName || S.staffId)}</b></div>
+      <button class="ft-btn" style="width:100%;text-align:center;padding:8px" onclick="S.drawerOpen=false;loadAll()">🔄 重新整理資料</button>
+      <a href="${GUIDE_URL}" class="ft-btn" style="width:100%;text-align:center;padding:8px">📖 返回招生工作手冊</a>
+      <div class="ft-copy" style="margin-top:auto">本系統僅供校內招生同仁使用。<br>網頁相關問題與內容更新，請洽 #251 思婷</div>
+    </div>
+  </div>
+
+  <nav class="m-nav">
+    ${pages.map(([k, v]) => `<button class="${S.page === k ? 'on' : ''}" onclick="S.page='${k}';draw()">${ICONS[k]}<span>${v.replace('招生活動','活動').replace('教職員','名冊').replace('招生','')}</span></button>`).join('')}
+  </nav>
+
   <main>
-    <div class="sec">TA-MING ADMISSIONS</div>
-    <h2 class="pt">${pages.find(x => x[0] === S.page)[1]}</h2>
-    <div class="bar">
-      <b>學年度</b>
-      <select onchange="S.year=this.value;draw()">
-        ${getYears().map(y => `<option value="${y}" ${String(S.year) === y ? 'selected' : ''}>${y} 學年度</option>`).join('')}
-      </select>
+    <div class="page-hd">
+      <div>
+        <div class="sec">TA-MING ADMISSIONS</div>
+        <h2 class="pt">${pages.find(x => x[0] === S.page)[1]}</h2>
+      </div>
+      <div class="yr-box">
+        <label>學年度</label>
+        <select onchange="S.year=this.value;draw()">
+          ${getYears().map(y => `<option value="${y}" ${String(S.year) === y ? 'selected' : ''}>${y} 學年度</option>`).join('')}
+        </select>
+      </div>
     </div>
     <div id="content"></div>
   </main>`;
@@ -241,22 +414,72 @@ function home() {
   const tt = T.map((_, i) => as.filter(a => a.t === i).length);
   const mx = Math.max(1, ...tt);
   const people = as.reduce((s, a) => s + a.ac.length, 0);
+  const onDuty = S.staff.filter(p => p.on).length;
   const actStaff = c.filter(x => x.total > 0).length;
-  const top = [...c].filter(x => x.total > 0).sort((a, b) => b.total - a.total).slice(0, 10);
+  const allFull = onDuty > 0 && actStaff >= onDuty;
+
+  const distItems = T.map((t, i) => ({ name: t[0], color: t[1], count: tt[i] }))
+    .filter(x => !S.hideZero || x.count > 0);
+
+  const rankedAll = [...c].filter(x => x.total > 0).sort((a, b) => b.total - a.total);
+  const limit = S.rankExpanded ? 10 : 5;
+  const top = rankedAll.slice(0, limit);
+  const maxRank = Math.max(1, top[0]?.total || 1);
 
   return `
-  <div class="grid">
-    <div class="card"><div class="mu">活動總場次（不含取消）</div><div class="num">${as.length}</div></div>
-    <div class="card"><div class="mu">實際參與總人次</div><div class="num">${people}</div></div>
-    <div class="card"><div class="mu">參與教職員人數</div><div class="num">${actStaff} <span class="mu">/ ${S.staff.filter(p => p.on).length} 在職</span></div></div>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">活動總場次（不含取消）</div>
+      <div class="kpi-val-row"><span class="kpi-num">${as.length}</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">實際參與總人次</div>
+      <div class="kpi-val-row"><span class="kpi-num">${people}</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">參與教職員人數</div>
+      <div class="kpi-val-row">
+        <div><span class="kpi-num">${actStaff}</span> <span class="kpi-sub">/ ${onDuty} 在職</span></div>
+        ${allFull ? '<span class="status-pill">全員參與</span>' : ''}
+      </div>
+    </div>
   </div>
+
   <div class="card">
-    <b>各類型場次分布</b>
-    ${T.map((t, i) => `<div class="row"><span class="l"><span class="dot" style="background:${t[1]}"></span>${t[0]}</span><div class="trk"><div class="fil" style="width:${tt[i] / mx * 100}%;background:${t[1]}"></div></div><span style="width:28px;text-align:right">${tt[i]}</span></div>`).join('')}
+    <div class="card-hd">
+      <div>
+        <h3 class="card-title">各類型場次分布</h3>
+        <div class="card-sub">0 場次項目已自動降低視覺比重</div>
+      </div>
+      <button class="btn ghost" onclick="S.hideZero=!S.hideZero;draw()">${S.hideZero ? '顯示全部類型' : '隱藏 0 場次'}</button>
+    </div>
+    <div class="dist-list">
+      ${distItems.map(x => `
+        <div class="dist-row ${x.count === 0 ? 'is-zero' : ''}">
+          <span class="dist-label"><span class="dist-dot" style="background:${x.color}"></span>${x.name}</span>
+          <div class="track"><div class="fil" style="width:${x.count / mx * 100}%;background:${x.color}"></div></div>
+          <span class="dist-cnt">${x.count}</span>
+        </div>`).join('') || '<p class="mu">本學年度尚無活動場次</p>'}
+    </div>
   </div>
+
   <div class="card">
-    <b>參與次數排行榜（前 10 名）</b>
-    ${top.map((p, i) => `<div class="row"><span class="l">${i + 1}. <span class="link" onclick="person('${esc(p.id)}')">${esc(p.name)}</span></span><div class="trk"><div class="fil" style="width:${p.total / Math.max(1, top[0].total) * 100}%;background:var(--navy)"></div></div><span style="width:28px;text-align:right">${p.total}</span></div>`).join('') || '<p class="mu">本學年度尚無實際出席紀錄</p>'}
+    <div class="card-hd">
+      <div>
+        <h3 class="card-title">參與次數排行榜（前 ${Math.min(limit, Math.max(5, rankedAll.length))} 名）</h3>
+        <div class="card-sub">點擊姓名可檢視該師本學年度參與明細</div>
+      </div>
+      ${rankedAll.length > 5 ? `<button class="btn ghost" onclick="S.rankExpanded=!S.rankExpanded;draw()">${S.rankExpanded ? '收合為前 5 名' : '展開前 10 名'}</button>` : ''}
+    </div>
+    <div class="rank-list">
+      ${top.map((p, i) => `
+        <div class="rank-row ${i < 3 ? 'top3' : ''}" onclick="person('${esc(p.id)}')">
+          <span class="rank-badge">${i + 1}</span>
+          <span class="rank-name">${esc(p.name)}</span>
+          <div class="rank-track"><div class="rank-fill" style="width:${p.total / maxRank * 100}%"></div></div>
+          <span class="rank-cnt">${p.total}</span>
+        </div>`).join('') || '<p class="mu">本學年度尚無實際出席紀錄</p>'}
+    </div>
   </div>`;
 }
 
@@ -267,14 +490,14 @@ function cal() {
   let h = `
   <div class="bar">
     <button class="btn" onclick="shiftMonth(-1)">◀</button>
-    <b style="font-size:19px;min-width:120px;text-align:center">${y} 年 ${m + 1} 月</b>
+    <b style="font-size:18px;min-width:115px;text-align:center">${y} 年 ${m + 1} 月</b>
     <button class="btn" onclick="shiftMonth(1)">▶</button>
     <button class="btn ${S.view === 'cal' ? 'pri' : ''}" onclick="S.view='cal';draw()">月曆</button>
     <button class="btn ${S.view === 'list' ? 'pri' : ''}" onclick="S.view='list';draw()">列表</button>
-    <input id="aq" placeholder="搜尋活動名稱、類型或地點" style="min-width:240px" value="${esc(S.aq)}" oninput="S.aq=this.value;draw();focusEnd('#aq')">
+    <input id="aq" placeholder="搜尋活動名稱、類型或地點" style="min-width:210px;flex:1;max-width:300px" value="${esc(S.aq)}" oninput="S.aq=this.value;draw();focusEnd('#aq')">
   </div>
-  <div class="card" style="padding:12px 16px">
-    ${T.map(t => `<span style="margin-right:16px;font-size:14px;display:inline-block"><span class="dot" style="background:${t[1]}"></span>${t[0]}</span>`).join('')}
+  <div class="card" style="padding:12px 16px;margin-bottom:14px">
+    ${T.map(t => `<span style="margin-right:14px;font-size:13px;display:inline-block"><span class="dot" style="background:${t[1]}"></span>${t[0]}</span>`).join('')}
   </div>`;
 
   if (S.view === 'cal') {
@@ -287,7 +510,7 @@ function cal() {
   } else {
     const ym = `${y}-${String(m + 1).padStart(2, '0')}`;
     const list = yrActs().filter(a => a.date.startsWith(ym) && fa(a)).sort((a, b) => a.date.localeCompare(b.date));
-    h += `<div class="card">${list.map(a => `<div class="row" style="cursor:pointer" onclick="evt('${esc(a.id)}')"><span class="tag" style="background:${T[a.t]?.[1] || '#6b7280'}">${T[a.t]?.[0] || '其他'}</span><span>${esc(a.date)} ${esc(a.time)} <b>${esc(a.name)}</b>（${esc(a.loc)}）${a.cx ? '【已取消】' : ''}</span></div>`).join('') || '<p class="mu">本月無活動</p>'}</div>`;
+    h += `<div class="card">${list.map(a => `<div class="list-row" onclick="evt('${esc(a.id)}')"><span class="tag" style="background:${T[a.t]?.[1] || '#6b7280'}">${T[a.t]?.[0] || '其他'}</span><span>${esc(a.date)} ${esc(a.time)} <b>${esc(a.name)}</b>（${esc(a.loc)}）${a.cx ? '【已取消】' : ''}</span></div>`).join('') || '<p class="mu">本月無活動</p>'}</div>`;
   }
   return h;
 }
@@ -358,7 +581,7 @@ function manage() {
     <td class="n">${a.cls || 0}班/${a.ppl || 0}人</td>
     <td class="n">${a.pl.length}</td>
     <td class="n"><b>${a.ac.length}</b></td>
-    <td>${a.cx ? '<span style="color:#9E2A2F">已取消</span>' : a.date < today ? '已結束' : '<span style="color:#02257F;font-weight:500">預定</span>'}</td>
+    <td>${a.cx ? '<span style="color:var(--dg)">已取消</span>' : a.date < today ? '已結束' : '<span style="color:var(--navy);font-weight:600">預定</span>'}</td>
     <td>
       <button class="btn sm pri" onclick="attModal('${esc(a.id)}')">出席名單</button>
       <button class="btn sm" onclick="actForm('${esc(a.id)}')">修改</button>
@@ -369,7 +592,7 @@ function manage() {
   return `
   <div class="bar">
     <button class="btn pri" onclick="actForm()">＋ 新增活動</button>
-    <label class="btn" style="display:inline-block">
+    <label class="btn" style="cursor:pointer">
       匯入活動 Excel <input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImportActs(event)">
     </label>
     <button class="btn" onclick="downloadActTemplate()">下載活動範本</button>
@@ -377,38 +600,23 @@ function manage() {
   </div>
   <div class="card sc">
     <div style="margin-bottom:10px">
-      <b style="font-size:17px;color:var(--navy)">📅 預定活動</b>
+      <b style="font-size:16px;color:var(--navy)">📅 預定活動</b>
       <span class="mu">（${upcoming.length} 場）</span>
     </div>
-    <table>
-      ${tableHead}
-      ${renderRows(upcoming, '目前沒有預定中的活動')}
-    </table>
+    <table>${tableHead}${renderRows(upcoming, '目前沒有預定中的活動')}</table>
   </div>
   <div class="card sc">
     <div style="margin-bottom:10px">
-      <b style="font-size:17px;color:var(--mu)">✅ 已結束活動</b>
+      <b style="font-size:16px;color:var(--tx2)">✅ 已結束活動</b>
       <span class="mu">（${past.length} 場，含已取消）</span>
     </div>
-    <table>
-      ${tableHead}
-      ${renderRows(past, '本學年度尚無已結束的活動')}
-    </table>
+    <table>${tableHead}${renderRows(past, '本學年度尚無已結束的活動')}</table>
   </div>`;
 }
 
 function downloadActTemplate() {
   const ws = XLSX.utils.json_to_sheet([
-    {
-      '學年度': '115', '日期': '2026-10-15', '時間': '09:00–11:30',
-      '活動類型': '入班宣導', '活動名稱': '潭子國中入班宣導', '學校／地點': '潭子國中',
-      '班級數': 3, '人數': 90, '備註': '', '實際出席人員': '王小明、林美華', '預計參與人員': ''
-    },
-    {
-      '學年度': '115', '日期': '2026-11-02', '時間': '13:30–15:30',
-      '活動類型': '說明會', '活動名稱': '國中部辦學說明會', '學校／地點': '大明高中',
-      '班級數': 1, '人數': 120, '備註': '假日場', '實際出席人員': '王小明', '預計參與人員': '王小明、林美華'
-    }
+    { '學年度': '115', '日期': '2026-10-15', '時間': '09:00–11:30', '活動類型': '入班宣導', '活動名稱': '潭子國中入班宣導', '學校／地點': '潭子國中', '班級數': 3, '人數': 90, '備註': '', '實際出席人員': '王小明、林美華', '預計參與人員': '' }
   ]);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, '招生活動');
@@ -423,8 +631,7 @@ function parseExcelDate(val) {
   }
   const s = String(val).trim().replace(/\//g, '-');
   const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-  if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
-  return s;
+  return m ? `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}` : s;
 }
 
 function matchStaffTokens(raw, unmatchedSet) {
@@ -473,19 +680,14 @@ function handleImportActs(e) {
 
       if (!list.length) return alert('找不到有效活動，請確認欄位包含「日期」與「活動名稱」');
       let msg = `即將匯入 ${list.length} 場招生活動。`;
-      if (unmatched.size) {
-        msg += `\n\n⚠ 以下 ${unmatched.size} 位人員在「教職員名冊」中找不到（將略過，請檢查是否打錯字）：\n` + [...unmatched].join('、');
-      }
-      msg += '\n\n確定要繼續匯入嗎？';
-      if (!confirm(msg)) return;
+      if (unmatched.size) msg += `\n\n⚠ 以下 ${unmatched.size} 位人員在名冊中找不到（將略過）：\n` + [...unmatched].join('、');
+      if (!confirm(msg + '\n\n確定要繼續匯入嗎？')) return;
 
       const data = await api('importActivities', { list });
       S.staff = data.staff; S.activities = data.activities;
       draw();
       alert(`匯入完成！共新增 ${list.length} 場活動。`);
-    } catch (err) {
-      alert('匯入失敗：' + err.message);
-    }
+    } catch (err) { alert('匯入失敗：' + err.message); }
   };
   reader.readAsArrayBuffer(file);
   e.target.value = '';
@@ -496,7 +698,7 @@ function roster() {
   const list = S.staff.filter(p => (p.id + p.name + p.dept).toLowerCase().includes(q));
   return `
   <div class="bar">
-    <label class="btn pri" style="display:inline-block">
+    <label class="btn pri" style="cursor:pointer">
       匯入 Excel 名冊 <input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleImport(event)">
     </label>
     <button class="btn" onclick="downloadTemplate()">下載匯入範本</button>
@@ -510,7 +712,7 @@ function roster() {
         <td>${esc(p.id)}</td>
         <td>${esc(p.name)}</td>
         <td>${esc(p.dept)}</td>
-        <td>${p.on ? '<span style="color:#2F8F45;font-weight:500">在職</span>' : '<span class="mu">已停用</span>'}</td>
+        <td>${p.on ? '<span style="color:var(--ok-tx);font-weight:600">在職</span>' : '<span class="mu">已停用</span>'}</td>
         <td>
           <button class="btn sm" onclick="staffForm('${esc(p.id)}')">修改</button>
           <button class="btn sm ${p.on ? 'dg' : ''}" onclick="toggleStaff('${esc(p.id)}')">${p.on ? '停用' : '啟用'}</button>
@@ -523,8 +725,7 @@ function roster() {
 
 function downloadTemplate() {
   const ws = XLSX.utils.json_to_sheet([
-    { '教職員編號': 'T1001', '姓名': '王小明', '處室': '教務處', '狀態': '在職' },
-    { '教職員編號': 'T1002', '姓名': '林美華', '處室': '輔導室', '狀態': '在職' }
+    { '教職員編號': 'T1001', '姓名': '王小明', '處室': '教務處', '狀態': '在職' }
   ]);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, '教職員名冊');
@@ -546,14 +747,12 @@ function handleImport(e) {
         on: String(r['狀態'] ?? '在職') !== '停用'
       })).filter(x => x.id && x.name);
       if (!list.length) return alert('找不到有效資料，請確認欄位包含「教職員編號」與「姓名」');
-      if (!confirm(`即將匯入 ${list.length} 筆教職員資料（相同編號將自動更新），確定繼續？`)) return;
+      if (!confirm(`即將匯入 ${list.length} 筆教職員資料，確定繼續？`)) return;
       const data = await api('importStaff', { list });
       S.staff = data.staff; S.activities = data.activities;
       draw();
       alert('匯入完成！');
-    } catch (err) {
-      alert('匯入失敗：' + err.message);
-    }
+    } catch (err) { alert('匯入失敗：' + err.message); }
   };
   reader.readAsArrayBuffer(file);
   e.target.value = '';
@@ -573,7 +772,7 @@ function evt(id) {
     <p class="mu">預計參與 ${a.pl.length} 人｜實際出席 ${a.ac.length} 人</p>
     <b>預計參與名單</b><p>${esc(names(a.pl))}</p>
     <b>實際出席名單（計入統計）</b><p>${esc(names(a.ac))}</p>
-    <p><button class="btn" onclick="closeM()">關閉</button></p>
+    <p><button class="btn pri" onclick="closeM()">關閉</button></p>
   `);
 }
 
@@ -589,7 +788,7 @@ function person(id) {
         ${l.map(a => `<tr><td>${esc(a.date)}</td><td>${esc(a.name)}</td><td><span class="tag" style="background:${T[a.t]?.[1] || '#6b7280'}">${T[a.t]?.[0] || '其他'}</span></td><td>${esc(a.loc)}</td></tr>`).join('') || '<tr><td colspan="4" class="mu">本學年度尚無實際參與紀錄（次數 0）</td></tr>'}
       </table>
     </div>
-    <p><button class="btn" onclick="closeM()">關閉</button></p>
+    <p style="margin-top:14px"><button class="btn pri" onclick="closeM()">關閉</button></p>
   `);
 }
 
@@ -679,7 +878,7 @@ function staffForm(id = '') {
   modal(`
     <h3 style="margin-top:0">${id ? '修改' : '新增'}教職員</h3>
     <form onsubmit="submitStaff(event,${!!p.on})">
-      <p>教職員編號（唯一識別碼）<br><input id="sid" style="width:100%${id ? ';background:#F8F6F1' : ''}" value="${esc(p.id)}" ${id ? 'readonly' : 'required'}></p>
+      <p>教職員編號（唯一識別碼）<br><input id="sid" style="width:100%${id ? ';background:var(--hover)' : ''}" value="${esc(p.id)}" ${id ? 'readonly' : 'required'}></p>
       <p>姓名<br><input id="sn" style="width:100%" value="${esc(p.name)}" required></p>
       <p>處室<br><input id="sd" style="width:100%" value="${esc(p.dept)}" required></p>
       <div class="bar"><button class="btn pri">儲存</button><button type="button" class="btn" onclick="closeM()">取消</button></div>
@@ -706,6 +905,7 @@ async function toggleStaff(id) {
   } catch (err) { alert('更新失敗：' + err.message); }
 }
 
+window.addEventListener('resize', notifyHeight);
 loadAll();
 </script>
 </body>
